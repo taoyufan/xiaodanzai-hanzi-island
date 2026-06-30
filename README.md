@@ -24,6 +24,65 @@ npm run dev
 npm run build
 ```
 
+## 服务端部署配置
+
+当前线上域名和 Nginx 静态目录：
+
+- 域名：`danzai.lufangfang.cn`
+- 站点目录：`/data/xiaodanzai`
+
+CentOS 7 服务器可以不安装 Node.js，推荐在本地构建后上传 `dist/` 内容到 `/data/xiaodanzai`：
+
+```bash
+npm run build
+tar -czf xiaodanzai-dist.tar.gz -C dist .
+scp xiaodanzai-dist.tar.gz root@服务器IP:/tmp/
+```
+
+服务器解压：
+
+```bash
+sudo mkdir -p /data/xiaodanzai
+sudo tar -xzf /tmp/xiaodanzai-dist.tar.gz -C /data/xiaodanzai
+```
+
+Nginx 配置：
+
+```nginx
+server {
+    listen 80;
+    server_name danzai.lufangfang.cn;
+
+    root /data/xiaodanzai;
+    index index.html;
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}
+```
+
+写入配置并重载：
+
+```bash
+sudo tee /etc/nginx/conf.d/xiaodanzai.conf > /dev/null <<'EOF'
+server {
+    listen 80;
+    server_name danzai.lufangfang.cn;
+
+    root /data/xiaodanzai;
+    index index.html;
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}
+EOF
+
+sudo nginx -t
+sudo systemctl reload nginx
+```
+
 ## 项目结构
 
 ```text
