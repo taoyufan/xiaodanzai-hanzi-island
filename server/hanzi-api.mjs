@@ -11,7 +11,7 @@ const dataDir = path.join(rootDir, 'data');
 const dbPath = process.env.XIAODANZAI_DB ?? path.join(dataDir, 'xiaodanzai.sqlite');
 const port = Number(process.env.PORT ?? 8787);
 const childName = '宝一一';
-const DAILY_PLAN_VERSION = 3;
+const DAILY_PLAN_VERSION = 5;
 const DAILY_NEW_CHAR_TARGET = 20;
 
 mkdirSync(dataDir, { recursive: true });
@@ -50,12 +50,21 @@ db.exec(`
 `);
 
 const level1Chars = Array.from(commonStandardCharsLevel1);
+const starterChars = Array.from(
+  [
+    '人口手足目耳头心大小日月山水火木土石田云雨风鸟鱼虫牛羊马猫狗兔鸡',
+    '爸妈爷奶姐姐哥哥妹妹弟弟孩女男家门书学画歌舞跑跳吃喝看听说笑爱好玩',
+    '上下来去里外左右前后中天星花草树果车船衣鞋帽灯床桌椅饭米面包奶',
+    '春夏秋冬早晚红黄蓝绿白黑园校老师朋友宝宝',
+  ].join(''),
+).filter((char) => level1Chars.includes(char));
+const learningOrderChars = unique([...starterChars, ...level1Chars]);
 const worlds = [
-  { id: 'body', title: '基础字岛', chars: level1Chars.filter((_char, index) => index % 3 === 0) },
-  { id: 'nature', title: '进阶字谷', chars: level1Chars.filter((_char, index) => index % 3 === 1) },
-  { id: 'animal', title: '故事字林', chars: level1Chars.filter((_char, index) => index % 3 === 2) },
+  { id: 'body', title: '基础字岛', chars: learningOrderChars.filter((_char, index) => index % 3 === 0) },
+  { id: 'nature', title: '进阶字谷', chars: learningOrderChars.filter((_char, index) => index % 3 === 1) },
+  { id: 'animal', title: '故事字林', chars: learningOrderChars.filter((_char, index) => index % 3 === 2) },
 ];
-const allChars = unique(worlds.flatMap((world) => world.chars));
+const allChars = learningOrderChars;
 
 const routeHandlers = {
   'GET /api/health': handleHealth,
@@ -268,10 +277,14 @@ function createDailyPlan(profileId, dateKey, save) {
   const learnedSet = new Set(learnedChars);
   const unseenChars = allChars.filter((char) => !learnedSet.has(char));
   const dailyNewChars = selectDailyNewChars(unseenChars, seedBase);
+  const hasLearnedChars = learnedChars.length > 0 || weakChars.length > 0;
+  const fallbackReviewCandidates = hasLearnedChars
+    ? allChars.filter((char) => !dailyNewChars.includes(char))
+    : dailyNewChars;
   const reviewChars = unique([
     ...weakChars,
     ...seededShuffle(learnedChars, `${seedBase}:review`),
-    ...seededShuffle(allChars.filter((char) => !dailyNewChars.includes(char)), `${seedBase}:fallback-review`),
+    ...seededShuffle(fallbackReviewCandidates, `${seedBase}:fallback-review`),
   ]);
   const difficulty = Math.min(3, 1 + Math.floor(masteredCount / 100));
 
@@ -280,13 +293,14 @@ function createDailyPlan(profileId, dateKey, save) {
     const worldNew = dailyNewChars.filter((char) => world.chars.includes(char));
     const worldWeak = weakChars.filter((char) => world.chars.includes(char));
     const worldReview = reviewChars.filter((char) => world.chars.includes(char));
-    const worldPool = unique([...worldNew, ...worldWeak, ...worldReview, ...shuffled]);
+    const worldPool = unique([...worldNew, ...worldWeak, ...worldReview]);
+    const fallbackPool = worldPool.length > 0 ? worldPool : shuffled.slice(0, 3);
     const titleNo = worldIndex + 1;
-    const first = pickLevelChars(worldNew, worldPool, 3, 0);
-    const second = pickLevelChars(worldNew, worldPool, 3, 3);
-    const memory = pickLevelChars(worldNew, worldPool, 3, 6);
-    const review = pickLevelChars(unique([...worldWeak, ...worldNew]), worldPool, Math.min(8, Math.max(6, worldNew.length)), 0);
-    const boss = pickLevelChars(unique([...worldWeak, ...worldNew]), worldPool, Math.min(worldPool.length, 8 + difficulty), 0);
+    const first = pickLevelChars(worldNew, fallbackPool, 3, 0);
+    const second = pickLevelChars(worldNew, fallbackPool, 3, 3);
+    const memory = pickLevelChars(worldNew, fallbackPool, 3, 6);
+    const review = pickLevelChars(unique([...worldWeak, ...worldNew]), fallbackPool, Math.min(8, Math.max(6, worldNew.length)), 0);
+    const boss = pickLevelChars(unique([...worldWeak, ...worldNew]), fallbackPool, Math.min(fallbackPool.length, 8 + difficulty), 0);
     const questionCount = Math.min(8, 5 + difficulty);
 
     return [

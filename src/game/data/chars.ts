@@ -1,4 +1,5 @@
 import type { CharItem } from '../types';
+import { charUsageByChar } from './charUsage';
 import { commonStandardCharsLevel1 } from './commonChars';
 
 const curatedCharItems: CharItem[] = [
@@ -375,6 +376,7 @@ const curatedChars = new Set(curatedCharItems.map((item) => item.char));
 const commonChars = Array.from(commonStandardCharsLevel1);
 
 function makeGeneratedCharItem(char: string, index: number): CharItem {
+  const usage = charUsageByChar[char];
   const confusers = [
     commonChars[(index + 1) % commonChars.length],
     commonChars[(index + 7) % commonChars.length],
@@ -385,11 +387,11 @@ function makeGeneratedCharItem(char: string, index: number): CharItem {
     id: `zi_common_${char.codePointAt(0)?.toString(16) ?? index}`,
     char,
     pinyin: '',
-    meaning: `认识汉字“${char}”`,
+    meaning: usage?.meaning ?? `在故事里认识“${char}”`,
     category: index < 1200 ? 'common-basic' : index < 2400 ? 'common-advance' : 'common-expand',
     emoji: '⭐',
-    words: [`${char}字`, `认识${char}`, `写${char}`],
-    sentence: `宝一一今天认识了“${char}”。`,
+    words: usage?.words ?? [char],
+    sentence: usage?.sentence ?? `宝一一在故事里读到了“${char}”。`,
     confusers: confusers.slice(0, 3),
   };
 }
