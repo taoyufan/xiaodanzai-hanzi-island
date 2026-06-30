@@ -15,7 +15,7 @@ export class MapScene extends Phaser.Scene {
     this.drawBackground();
 
     this.add
-      .text(375, 72, `${playerProfile.childName}的闯关地图`, {
+      .text(375, 72, `${playerProfile.childName}一个人的闯关地图`, {
         fontFamily: 'Arial Rounded MT Bold, PingFang SC, Microsoft YaHei, sans-serif',
         fontSize: '50px',
         color: '#ffffff',
@@ -25,7 +25,7 @@ export class MapScene extends Phaser.Scene {
       .setOrigin(0.5);
 
     this.add
-      .text(375, 132, `${playerProfile.starName}：${getTotalStars(save)}  ${playerProfile.coinName}：${save.coins}`, {
+      .text(375, 132, `${playerProfile.childName}的${playerProfile.starName}：${getTotalStars(save)}  ${playerProfile.coinName}：${save.coins}`, {
         fontFamily: 'Arial Rounded MT Bold, PingFang SC, Microsoft YaHei, sans-serif',
         fontSize: '30px',
         color: '#39506b',
@@ -38,6 +38,16 @@ export class MapScene extends Phaser.Scene {
       const y = 274 + index * 318;
       this.drawWorld(world.id, world.title, world.subtitle, world.color, world.darkColor, y);
     });
+
+    this.add
+      .text(375, 1158, playerProfile.mapGoal, {
+        fontFamily: 'PingFang SC, Microsoft YaHei, sans-serif',
+        fontSize: '22px',
+        color: '#4d3d52',
+        backgroundColor: '#ffffff99',
+        padding: { x: 14, y: 8 },
+      })
+      .setOrigin(0.5);
 
     new BigButton(this, 375, 1242, '返回首页', () => this.scene.start('HomeScene'), {
       fillColor: 0xffffff,
@@ -157,7 +167,8 @@ export class MapScene extends Phaser.Scene {
         backgroundColor: '#5d4267cc',
         padding: { x: 24, y: 14 },
       })
-      .setOrigin(0.5);
+      .setOrigin(0.5)
+      .setDepth(1000);
     this.tweens.add({
       targets: toast,
       y: 1108,

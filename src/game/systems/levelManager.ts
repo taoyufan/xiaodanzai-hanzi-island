@@ -38,5 +38,6 @@ export function getLevelProgressText(level: LevelConfig, save: SaveData = loadSa
   if (isLevelUnlocked(level, save)) {
     return save.levelProgress[level.id]?.stars ? '已解锁' : '新关卡';
   }
-  return `${level.unlockStarsRequired} 星解锁`;
+  const need = Math.max(0, level.unlockStarsRequired - getTotalStars(save));
+  return `还差 ${need} 星`;
 }

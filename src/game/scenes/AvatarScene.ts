@@ -43,7 +43,7 @@ export class AvatarScene extends Phaser.Scene {
 
     this.hero = new EggHero(this, 375, 340, this.save.equippedCostumeId);
     this.feedbackText = this.add
-      .text(375, 514, `给${playerProfile.heroName}换上喜欢的装扮吧`, {
+      .text(375, 514, playerProfile.avatarLine, {
         fontFamily: 'PingFang SC, Microsoft YaHei, sans-serif',
         fontSize: '28px',
         color: '#5d4267',
@@ -100,7 +100,7 @@ export class AvatarScene extends Phaser.Scene {
         })
         .setOrigin(0, 0.5);
       const status = this.add
-          .text(-42, 18, equipped ? '穿戴中' : unlocked ? '点击穿戴' : `${reward.cost} ${playerProfile.coinName}解锁`, {
+          .text(-42, 18, equipped ? `${playerProfile.shortName}穿戴中` : unlocked ? '点一下穿戴' : `${reward.cost} ${playerProfile.coinName}解锁`, {
           fontFamily: 'PingFang SC, Microsoft YaHei, sans-serif',
           fontSize: '23px',
           color: unlocked || canBuy ? '#4d7b22' : '#8a7698',
@@ -112,10 +112,10 @@ export class AvatarScene extends Phaser.Scene {
       card.on('pointerup', () => this.handleRewardClick(reward.id, reward.cost, reward.name));
     });
 
-    new BigButton(this, 375, 554, '卸下装扮', () => {
+    new BigButton(this, 375, 554, '换回原样', () => {
       this.save = equipCostume(null);
       this.hero.setCostume(null);
-      this.feedbackText.setText(`${playerProfile.heroName}换回原本样子啦`);
+      this.feedbackText.setText(`${playerProfile.heroName}换回宝一一熟悉的样子啦`);
       playCorrectSound();
       this.scene.restart();
     }, {
@@ -131,7 +131,7 @@ export class AvatarScene extends Phaser.Scene {
     if (this.save.unlockedCostumeIds.includes(costumeId)) {
       this.save = equipCostume(costumeId);
       this.hero.setCostume(costumeId);
-      this.feedbackText.setText(`已穿戴：${name}`);
+      this.feedbackText.setText(`宝一一选好了：${name}`);
       playCorrectSound();
       this.scene.restart();
       return;
@@ -142,11 +142,11 @@ export class AvatarScene extends Phaser.Scene {
     if (result.ok) {
       playCoinSound();
       this.save = equipCostume(costumeId);
-      this.feedbackText.setText(`解锁成功：${name}`);
+      this.feedbackText.setText(`宝一一解锁了：${name}`);
       this.scene.restart();
     } else {
       playWrongSound();
-      this.feedbackText.setText(`${playerProfile.coinName}还不够哦，继续闯关收集吧`);
+      this.feedbackText.setText(`${playerProfile.coinName}还不够哦，宝一一继续闯关收集吧`);
     }
     this.coinText.setText(`${playerProfile.coinName}：${this.save.coins}`);
   }

@@ -41,9 +41,9 @@ export class ResultScene extends Phaser.Scene {
     hero.celebrate();
 
     this.add
-      .text(375, 96, `${playerProfile.childName}完成啦`, {
+      .text(375, 96, `${playerProfile.childName}又点亮一关啦`, {
         fontFamily: 'Arial Rounded MT Bold, PingFang SC, Microsoft YaHei, sans-serif',
-        fontSize: '54px',
+        fontSize: '48px',
         color: '#ffffff',
         stroke: '#ef7b45',
         strokeThickness: 9,
@@ -61,7 +61,7 @@ export class ResultScene extends Phaser.Scene {
       .setOrigin(0.5);
 
     this.add
-      .text(375, 548, `本关得分：${this.result.score}\n正确率：${this.result.accuracy}%\n获得${playerProfile.coinName}：${this.result.coins}`, {
+      .text(375, 548, `宝一一本关得分：${this.result.score}\n正确率：${this.result.accuracy}%\n获得${playerProfile.coinName}：${this.result.coins}`, {
         fontFamily: 'Arial Rounded MT Bold, PingFang SC, Microsoft YaHei, sans-serif',
         fontSize: '34px',
         color: '#4d3d52',

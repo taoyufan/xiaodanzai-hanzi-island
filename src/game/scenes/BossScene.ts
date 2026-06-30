@@ -103,7 +103,7 @@ export class BossScene extends Phaser.Scene {
 
     this.scoreText = this.add.text(58, 92, '分数 0', this.topTextStyle());
     this.comboText = this.add.text(236, 92, '连击 0', this.topTextStyle());
-    this.hpText = this.add.text(420, 92, 'Boss 5/5', this.topTextStyle());
+    this.hpText = this.add.text(420, 92, '错字怪 5/5', this.topTextStyle());
     new BigButton(this, 650, 90, '地图', () => this.scene.start('MapScene'), {
       width: 112,
       height: 56,
@@ -217,7 +217,7 @@ export class BossScene extends Phaser.Scene {
     useHint(this.scoreState);
     this.updateTopBar();
     speak(`${this.currentItem.char}，${this.currentItem.words[0]}的${this.currentItem.char}。${this.currentItem.sentence}`);
-    this.feedbackText.setText(`${playerProfile.childName}的小提示来啦，慢慢找`);
+    this.feedbackText.setText(playerProfile.hintLine);
   }
 
   private handleChoice(selectedChar: string, option: BossOption): void {
@@ -239,8 +239,8 @@ export class BossScene extends Phaser.Scene {
       this.hero.happyJump();
       this.updateTopBar();
       playCorrectSound();
-      const praiseText = `${playerProfile.childName}太棒啦，错字怪变小啦`;
-      this.feedbackText.setText(`${playerProfile.childName}太棒啦！Boss 少 1 点活力  ${gain.messages.join('  ')}`);
+      const praiseText = `${this.getPraiseText()}，错字怪变小啦`;
+      this.feedbackText.setText(`${praiseText}！${gain.messages.join('  ')}`);
       this.tweens.add({
         targets: option,
         scale: 1.08,
@@ -256,8 +256,8 @@ export class BossScene extends Phaser.Scene {
     scoreWrong(this.scoreState);
     this.updateTopBar();
     playWrongSound();
-    speak(`${playerProfile.childName}，差一点点哦，再试一次`);
-    this.feedbackText.setText(`${playerProfile.childName}，差一点点哦，再试一次`);
+    speak(playerProfile.retryLine);
+    this.feedbackText.setText(playerProfile.retryLine);
     this.hero.sadShake();
     option.setAlpha(0.5);
   }
@@ -274,7 +274,12 @@ export class BossScene extends Phaser.Scene {
   private updateTopBar(): void {
     this.scoreText.setText(`分数 ${this.scoreState.score}`);
     this.comboText.setText(`连击 ${this.scoreState.streak}`);
-    this.hpText.setText(`Boss ${this.health}/5`);
+    this.hpText.setText(`错字怪 ${this.health}/5`);
+  }
+
+  private getPraiseText(): string {
+    const index = Phaser.Math.Between(0, playerProfile.praiseLines.length - 1);
+    return playerProfile.praiseLines[index] ?? `${playerProfile.childName}太棒啦`;
   }
 
   private clearContent(): void {

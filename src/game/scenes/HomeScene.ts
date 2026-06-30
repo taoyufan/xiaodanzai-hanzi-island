@@ -26,7 +26,7 @@ export class HomeScene extends Phaser.Scene {
       .setOrigin(0.5);
 
     this.add
-      .text(375, 198, `${playerProfile.childName}，今天去收集哪颗${playerProfile.starName}？`, {
+      .text(375, 198, playerProfile.homeQuestion, {
         fontFamily: 'Arial Rounded MT Bold, PingFang SC, Microsoft YaHei, sans-serif',
         fontSize: '30px',
         color: '#5d4267',
@@ -43,23 +43,33 @@ export class HomeScene extends Phaser.Scene {
       ease: 'Sine.easeInOut',
     });
 
+    this.add
+      .text(375, 592, playerProfile.missionLine, {
+        fontFamily: 'Arial Rounded MT Bold, PingFang SC, Microsoft YaHei, sans-serif',
+        fontSize: '28px',
+        color: '#6b3a1f',
+        backgroundColor: '#fff1a8cc',
+        padding: { x: 18, y: 9 },
+      })
+      .setOrigin(0.5);
+
     new BigButton(this, 375, 720, `${playerProfile.childName}开始冒险`, () => {
-      speak(`${playerProfile.childName}，开始冒险啦`);
+      speak(`${playerProfile.heroName}陪${playerProfile.childName}出发啦`);
       this.scene.start('MapScene');
     });
-    new BigButton(this, 375, 842, '选择角色', () => this.scene.start('AvatarScene'), {
+    new BigButton(this, 375, 842, `${playerProfile.shortName}的装扮间`, () => this.scene.start('AvatarScene'), {
       fillColor: 0xb8f7ff,
       strokeColor: 0x36b9d6,
       textColor: '#125d72',
     });
-    new BigButton(this, 375, 964, '家长中心', () => this.showParentConfirm(), {
+    new BigButton(this, 375, 964, playerProfile.parentCenterName, () => this.showParentConfirm(), {
       fillColor: 0xe9ddff,
       strokeColor: 0x9b6bff,
       textColor: '#4d2c7c',
     });
 
     this.add
-      .text(375, 1246, `${playerProfile.childName}专属识字小岛`, {
+      .text(375, 1246, playerProfile.islandPromise, {
         fontFamily: 'PingFang SC, Microsoft YaHei, sans-serif',
         fontSize: '22px',
         color: '#6a5b73',
@@ -97,7 +107,7 @@ export class HomeScene extends Phaser.Scene {
       })
       .setOrigin(0.5);
     const body = this.add
-      .text(375, 622, `这里会展示${playerProfile.childName}的学习统计。\nMVP 版本点击确认即可进入。`, {
+      .text(375, 622, `${playerProfile.parentNote}\n确认后进入${playerProfile.parentCenterName}。`, {
         fontFamily: 'PingFang SC, Microsoft YaHei, sans-serif',
         fontSize: '28px',
         color: '#5d4267',

@@ -165,7 +165,7 @@ export class GameScene extends Phaser.Scene {
         190,
         this.level.mode === 'listen_jump'
           ? `${playerProfile.childName}，请找到这个字：${this.currentItem.char}`
-          : `${playerProfile.childName}，看图找一找对应的汉字`,
+          : `${playerProfile.childName}，看图帮${playerProfile.heroName}找汉字`,
         {
         fontFamily: 'Arial Rounded MT Bold, PingFang SC, Microsoft YaHei, sans-serif',
         fontSize: '40px',
@@ -315,7 +315,7 @@ export class GameScene extends Phaser.Scene {
     useHint(this.scoreState);
     this.updateTopBar();
     speak(`${this.currentItem.char}，${this.currentItem.words[0]}的${this.currentItem.char}。${this.currentItem.sentence}`);
-    this.feedbackText.setText(`${playerProfile.childName}的小提示来啦，仔细看一看`);
+    this.feedbackText.setText(playerProfile.hintLine);
   }
 
   private handleChoice(selectedChar: string, option: OptionNode): void {
@@ -333,8 +333,8 @@ export class GameScene extends Phaser.Scene {
       });
       this.updateTopBar();
       playCorrectSound();
-      const praiseText = `${playerProfile.childName}太棒啦，你答对啦`;
-      this.feedbackText.setText(`${playerProfile.childName}太棒啦！${gain.messages.join('  ')}`);
+      const praiseText = this.getPraiseText();
+      this.feedbackText.setText(`${praiseText}！${gain.messages.join('  ')}`);
       this.hero.happyJump();
       this.tweens.add({
         targets: this.hero,
@@ -353,8 +353,8 @@ export class GameScene extends Phaser.Scene {
     scoreWrong(this.scoreState);
     this.updateTopBar();
     playWrongSound();
-    speak(`${playerProfile.childName}，差一点点哦，再试一次`);
-    this.feedbackText.setText(`${playerProfile.childName}，差一点点哦，再试一次`);
+    speak(playerProfile.retryLine);
+    this.feedbackText.setText(playerProfile.retryLine);
     this.hero.sadShake();
     option.setAlpha(0.5);
   }
@@ -374,7 +374,7 @@ export class GameScene extends Phaser.Scene {
     this.progressText.setText('0/3');
 
     const title = this.add
-      .text(375, 178, `${playerProfile.childName}，翻开两张卡，帮汉字找到图片朋友`, {
+      .text(375, 178, `${playerProfile.childName}，帮${playerProfile.heroName}给汉字找到图片朋友`, {
         fontFamily: 'Arial Rounded MT Bold, PingFang SC, Microsoft YaHei, sans-serif',
         fontSize: '34px',
         color: '#4d3d52',
@@ -439,10 +439,10 @@ export class GameScene extends Phaser.Scene {
       this.matchedPairs += 1;
       this.memoryFirst.markMatched();
       this.memorySecond.markMatched();
-      this.feedbackText.setText(`${playerProfile.childName}配对成功！${gain.messages.join('  ')}`);
+      const pairPraiseText = this.getPraiseText();
+      this.feedbackText.setText(`${pairPraiseText}！${gain.messages.join('  ')}`);
       this.hero.happyJump();
       playCorrectSound();
-      const pairPraiseText = `${playerProfile.childName}答对啦`;
       this.memoryFirst = null;
       this.memorySecond = null;
       this.answerLocked = false;
@@ -460,10 +460,10 @@ export class GameScene extends Phaser.Scene {
     recordCharAnswer(char, false);
     scoreWrong(this.scoreState);
     this.updateTopBar();
-    this.feedbackText.setText(`${playerProfile.childName}没关系，再试一次`);
+    this.feedbackText.setText(playerProfile.memoryRetryLine);
     this.hero.sadShake();
     playWrongSound();
-    speak(`${playerProfile.childName}没关系，再试一次`);
+    speak(playerProfile.memoryRetryLine);
     this.time.delayedCall(650, () => {
       this.memoryFirst?.hide();
       this.memorySecond?.hide();
@@ -479,6 +479,11 @@ export class GameScene extends Phaser.Scene {
     if (this.level.mode !== 'memory_match') {
       this.progressText.setText(`${Math.min(this.questionIndex + 1, this.questions.length)}/${this.questions.length}`);
     }
+  }
+
+  private getPraiseText(): string {
+    const index = Phaser.Math.Between(0, playerProfile.praiseLines.length - 1);
+    return playerProfile.praiseLines[index] ?? `${playerProfile.childName}太棒啦`;
   }
 
   private clearContent(): void {

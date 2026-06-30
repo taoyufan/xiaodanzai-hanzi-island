@@ -24,6 +24,14 @@ export class ParentScene extends Phaser.Scene {
       })
       .setOrigin(0.5);
 
+    this.add
+      .text(375, 126, playerProfile.parentNote, {
+        fontFamily: 'PingFang SC, Microsoft YaHei, sans-serif',
+        fontSize: '22px',
+        color: '#45617a',
+      })
+      .setOrigin(0.5);
+
     this.drawStats([
       [`${playerProfile.childName}今日学习`, this.formatSeconds(getTodayStudySeconds(save))],
       ['已学习汉字', `${summary.learnedCount} 个`],
