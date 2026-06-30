@@ -163,9 +163,7 @@ export class GameScene extends Phaser.Scene {
       .text(
         375,
         190,
-        this.level.mode === 'listen_jump'
-          ? `${playerProfile.childName}，请找到这个字：${this.currentItem.char}`
-          : `${playerProfile.childName}，看图帮${playerProfile.heroName}找汉字`,
+        this.getQuestionPrompt(),
         {
         fontFamily: 'Arial Rounded MT Bold, PingFang SC, Microsoft YaHei, sans-serif',
         fontSize: '40px',
@@ -179,9 +177,26 @@ export class GameScene extends Phaser.Scene {
     if (this.level.mode === 'listen_jump') {
       speakCharPrompt(this.currentItem);
       this.renderListenJump();
+    } else if (this.level.mode === 'meaning_choice') {
+      this.renderMeaningChoice();
+    } else if (this.level.mode === 'word_choice') {
+      this.renderWordChoice();
     } else {
       this.renderImageChoice();
     }
+  }
+
+  private getQuestionPrompt(): string {
+    if (this.level.mode === 'listen_jump') {
+      return `${playerProfile.childName}，请找到这个字：${this.currentItem.char}`;
+    }
+    if (this.level.mode === 'meaning_choice') {
+      return `${playerProfile.childName}，看意思找汉字`;
+    }
+    if (this.level.mode === 'word_choice') {
+      return `${playerProfile.childName}，帮词语补上汉字`;
+    }
+    return `${playerProfile.childName}，看图帮${playerProfile.heroName}找汉字`;
   }
 
   private renderListenJump(): void {
@@ -242,6 +257,78 @@ export class GameScene extends Phaser.Scene {
 
     const optionChars = this.buildOptions(item);
     optionChars.forEach((char, index) => {
+      const button = this.createWordOption(164 + index * 211, 815, char);
+      this.contentGroup.add(button);
+    });
+  }
+
+  private renderMeaningChoice(): void {
+    const card = this.add.graphics();
+    card.fillStyle(0xffffff, 0.9);
+    card.fillRoundedRect(92, 288, 566, 232, 36);
+    card.lineStyle(6, 0x9b6bff, 1);
+    card.strokeRoundedRect(92, 288, 566, 232, 36);
+    const meaning = this.add
+      .text(375, 382, this.currentItem.meaning, {
+        fontFamily: 'Arial Rounded MT Bold, PingFang SC, Microsoft YaHei, sans-serif',
+        fontSize: '42px',
+        color: '#4d2c7c',
+        align: 'center',
+        wordWrap: { width: 490 },
+      })
+      .setOrigin(0.5);
+    const hintButton = new BigButton(this, 375, 584, '听一听', () => this.handleHint(), {
+      width: 230,
+      height: 64,
+      fontSize: 26,
+      fillColor: 0xfff1a8,
+      strokeColor: 0xffb347,
+    });
+    this.contentGroup.addMultiple([card, meaning, hintButton]);
+
+    this.buildOptions(this.currentItem).forEach((char, index) => {
+      const button = this.createWordOption(164 + index * 211, 815, char);
+      this.contentGroup.add(button);
+    });
+  }
+
+  private renderWordChoice(): void {
+    const word = this.currentItem.words[0] ?? `${this.currentItem.char}字`;
+    const maskedWord = word.includes(this.currentItem.char)
+      ? word.replace(this.currentItem.char, '□')
+      : `□${word}`;
+    const card = this.add.graphics();
+    card.fillStyle(0xffffff, 0.9);
+    card.fillRoundedRect(92, 288, 566, 232, 36);
+    card.lineStyle(6, 0x36b9d6, 1);
+    card.strokeRoundedRect(92, 288, 566, 232, 36);
+    const wordText = this.add
+      .text(375, 360, maskedWord, {
+        fontFamily: 'Arial Rounded MT Bold, PingFang SC, Microsoft YaHei, sans-serif',
+        fontSize: '70px',
+        color: '#125d72',
+        align: 'center',
+      })
+      .setOrigin(0.5);
+    const sentence = this.add
+      .text(375, 462, this.currentItem.sentence.replace(this.currentItem.char, '□'), {
+        fontFamily: 'PingFang SC, Microsoft YaHei, sans-serif',
+        fontSize: '29px',
+        color: '#5d4267',
+        align: 'center',
+        wordWrap: { width: 500 },
+      })
+      .setOrigin(0.5);
+    const hintButton = new BigButton(this, 375, 584, '听提示', () => this.handleHint(), {
+      width: 230,
+      height: 64,
+      fontSize: 26,
+      fillColor: 0xfff1a8,
+      strokeColor: 0xffb347,
+    });
+    this.contentGroup.addMultiple([card, wordText, sentence, hintButton]);
+
+    this.buildOptions(this.currentItem).forEach((char, index) => {
       const button = this.createWordOption(164 + index * 211, 815, char);
       this.contentGroup.add(button);
     });
@@ -501,7 +588,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   private finishLevel(): void {
-    const result = buildLevelResult(this.level.id, this.scoreState, this.learnedChars, false);
+    const result = buildLevelResult(this.level.id, this.scoreState, this.learnedChars, false, this.level.title);
     recordLevelCompletion(result);
     addStudySeconds((Date.now() - this.startedAt) / 1000);
     playWinSound();

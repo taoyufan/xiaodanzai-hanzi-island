@@ -12,13 +12,20 @@ export class AvatarScene extends Phaser.Scene {
   private hero!: EggHero;
   private coinText!: Phaser.GameObjects.Text;
   private feedbackText!: Phaser.GameObjects.Text;
+  private page = 0;
+  private readonly pageSize = 6;
 
   constructor() {
     super('AvatarScene');
   }
 
+  init(data: { page?: number }): void {
+    this.page = data.page ?? 0;
+  }
+
   create(): void {
     this.save = loadSave();
+    this.page = Phaser.Math.Clamp(this.page, 0, this.maxPage());
     this.drawBackground();
 
     this.add
@@ -74,8 +81,10 @@ export class AvatarScene extends Phaser.Scene {
     const startY = 680;
     const gapX = 350;
     const gapY = 210;
+    const start = this.page * this.pageSize;
+    const pageRewards = rewards.slice(start, start + this.pageSize);
 
-    rewards.forEach((reward, index) => {
+    pageRewards.forEach((reward, index) => {
       const col = index % 2;
       const row = Math.floor(index / 2);
       const x = startX + col * gapX;
@@ -112,12 +121,40 @@ export class AvatarScene extends Phaser.Scene {
       card.on('pointerup', () => this.handleRewardClick(reward.id, reward.cost, reward.name));
     });
 
+    this.add
+      .text(375, 620, `第 ${this.page + 1} / ${this.maxPage() + 1} 页`, {
+        fontFamily: 'Arial Rounded MT Bold, PingFang SC, Microsoft YaHei, sans-serif',
+        fontSize: '24px',
+        color: '#4d2c7c',
+      })
+      .setOrigin(0.5);
+
+    new BigButton(this, 190, 618, '上一页', () => this.changePage(-1), {
+      width: 180,
+      height: 58,
+      fontSize: 24,
+      fillColor: 0xffffff,
+      strokeColor: 0x9b6bff,
+      textColor: '#4d2c7c',
+      disabled: this.page <= 0,
+    });
+
+    new BigButton(this, 560, 618, '下一页', () => this.changePage(1), {
+      width: 180,
+      height: 58,
+      fontSize: 24,
+      fillColor: 0xffffff,
+      strokeColor: 0x9b6bff,
+      textColor: '#4d2c7c',
+      disabled: this.page >= this.maxPage(),
+    });
+
     new BigButton(this, 375, 554, '换回原样', () => {
       this.save = equipCostume(null);
       this.hero.setCostume(null);
       this.feedbackText.setText(`${playerProfile.heroName}换回宝一一熟悉的样子啦`);
       playCorrectSound();
-      this.scene.restart();
+      this.restartCurrentPage();
     }, {
       width: 270,
       height: 70,
@@ -133,7 +170,7 @@ export class AvatarScene extends Phaser.Scene {
       this.hero.setCostume(costumeId);
       this.feedbackText.setText(`宝一一选好了：${name}`);
       playCorrectSound();
-      this.scene.restart();
+      this.restartCurrentPage();
       return;
     }
 
@@ -143,11 +180,24 @@ export class AvatarScene extends Phaser.Scene {
       playCoinSound();
       this.save = equipCostume(costumeId);
       this.feedbackText.setText(`宝一一解锁了：${name}`);
-      this.scene.restart();
+      this.restartCurrentPage();
     } else {
       playWrongSound();
       this.feedbackText.setText(`${playerProfile.coinName}还不够哦，宝一一继续闯关收集吧`);
     }
     this.coinText.setText(`${playerProfile.coinName}：${this.save.coins}`);
+  }
+
+  private changePage(direction: number): void {
+    this.page = Phaser.Math.Clamp(this.page + direction, 0, this.maxPage());
+    this.restartCurrentPage();
+  }
+
+  private restartCurrentPage(): void {
+    this.scene.restart({ page: this.page });
+  }
+
+  private maxPage(): number {
+    return Math.max(0, Math.ceil(rewards.length / this.pageSize) - 1);
   }
 }

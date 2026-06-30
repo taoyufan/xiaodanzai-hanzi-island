@@ -1,10 +1,13 @@
 import Phaser from 'phaser';
 import { playerProfile } from '../data/player';
 import { BigButton } from '../objects/BigButton';
+import { bindPhoneForCloud, getCloudIdentityText } from '../systems/cloud';
 import { getParentSummary } from '../systems/progress';
 import { getTodayStudySeconds, loadSave } from '../systems/storage';
 
 export class ParentScene extends Phaser.Scene {
+  private syncText!: Phaser.GameObjects.Text;
+
   constructor() {
     super('ParentScene');
   }
@@ -82,14 +85,30 @@ export class ParentScene extends Phaser.Scene {
       .setOrigin(0, 0);
 
     this.add
-      .text(375, 1114, `${playerProfile.coinName}：${save.coins}    累计分数：${save.totalScore}`, {
+      .text(375, 1088, `${playerProfile.coinName}：${save.coins}    累计分数：${save.totalScore}`, {
         fontFamily: 'Arial Rounded MT Bold, PingFang SC, Microsoft YaHei, sans-serif',
         fontSize: '28px',
         color: '#4d3d52',
       })
       .setOrigin(0.5);
 
-    new BigButton(this, 375, 1236, '返回首页', () => this.scene.start('HomeScene'), {
+    this.syncText = this.add
+      .text(375, 1138, getCloudIdentityText(), {
+        fontFamily: 'PingFang SC, Microsoft YaHei, sans-serif',
+        fontSize: '23px',
+        color: '#45617a',
+      })
+      .setOrigin(0.5);
+
+    new BigButton(this, 375, 1188, '绑定手机号同步', () => this.handleBindPhone(), {
+      width: 300,
+      height: 62,
+      fontSize: 25,
+      fillColor: 0xfff1a8,
+      strokeColor: 0xffb347,
+    });
+
+    new BigButton(this, 375, 1262, '返回首页', () => this.scene.start('HomeScene'), {
       fillColor: 0xb8f7ff,
       strokeColor: 0x36b9d6,
       textColor: '#125d72',
@@ -149,5 +168,15 @@ export class ParentScene extends Phaser.Scene {
       return `${remainSeconds} 秒`;
     }
     return `${minutes} 分 ${remainSeconds} 秒`;
+  }
+
+  private async handleBindPhone(): Promise<void> {
+    this.syncText.setText('正在同步宝一一的学习记录...');
+    try {
+      const text = await bindPhoneForCloud();
+      this.syncText.setText(text);
+    } catch {
+      this.syncText.setText('同步暂时没有连上，稍后再试');
+    }
   }
 }

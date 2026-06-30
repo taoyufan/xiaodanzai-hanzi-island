@@ -104,6 +104,7 @@ export function buildLevelResult(
   state: ScoreState,
   learnedChars: string[],
   isBoss: boolean,
+  title?: string,
 ): LevelRunResult {
   const stars = calculateStars(state.correctCount, state.wrongCount, state.hintsUsed);
   const attempts = state.correctCount + state.wrongCount;
@@ -111,6 +112,7 @@ export function buildLevelResult(
 
   return {
     levelId,
+    title,
     score: state.score,
     stars,
     coins: coinsForLevel(stars, isBoss),

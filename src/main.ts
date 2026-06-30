@@ -7,6 +7,7 @@ import { GameScene } from './game/scenes/GameScene';
 import { BossScene } from './game/scenes/BossScene';
 import { ResultScene } from './game/scenes/ResultScene';
 import { ParentScene } from './game/scenes/ParentScene';
+import { initializeCloudProfile } from './game/systems/cloud';
 
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
@@ -30,8 +31,18 @@ const config: Phaser.Types.Core.GameConfig = {
   scene: [HomeScene, AvatarScene, MapScene, GameScene, BossScene, ResultScene, ParentScene],
 };
 
-const game = new Phaser.Game(config);
+void boot();
 
-if (import.meta.env.DEV || window.location.hostname === 'localhost') {
-  (window as unknown as { __HANZI_GAME__?: Phaser.Game }).__HANZI_GAME__ = game;
+async function boot(): Promise<void> {
+  try {
+    await initializeCloudProfile();
+  } catch (error) {
+    console.warn('Cloud sync unavailable, using local progress.', error);
+  }
+
+  const game = new Phaser.Game(config);
+
+  if (import.meta.env.DEV || window.location.hostname === 'localhost') {
+    (window as unknown as { __HANZI_GAME__?: Phaser.Game }).__HANZI_GAME__ = game;
+  }
 }

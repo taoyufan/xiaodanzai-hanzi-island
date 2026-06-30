@@ -30,7 +30,7 @@ export function loadSave(): SaveData {
   const raw = window.localStorage.getItem(STORAGE_KEY);
   if (!raw) {
     const fresh = createDefaultSave();
-    saveGame(fresh);
+    saveGame(fresh, false);
     return fresh;
   }
 
@@ -38,7 +38,7 @@ export function loadSave(): SaveData {
     const parsed = JSON.parse(raw) as SaveData;
     if (parsed.version !== SAVE_VERSION) {
       const migrated = { ...createDefaultSave(), ...parsed, version: SAVE_VERSION };
-      saveGame(migrated);
+      saveGame(migrated, false);
       return migrated;
     }
     return {
@@ -51,13 +51,21 @@ export function loadSave(): SaveData {
     };
   } catch {
     const fresh = createDefaultSave();
-    saveGame(fresh);
+    saveGame(fresh, false);
     return fresh;
   }
 }
 
-export function saveGame(save: SaveData): void {
+export function saveGame(save: SaveData, notify = true): void {
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(save));
+  if (notify) {
+    window.dispatchEvent(new CustomEvent<SaveData>('hanzi-save-updated', { detail: save }));
+  }
+}
+
+export function replaceSave(save: SaveData, notify = true): SaveData {
+  saveGame(save, notify);
+  return save;
 }
 
 export function mutateSave(mutator: (save: SaveData) => void): SaveData {
@@ -99,7 +107,7 @@ export function recordLevelCompletion(result: LevelRunResult): SaveData {
     save.recentCompletions = [
       {
         levelId: result.levelId,
-        title: level?.title ?? result.levelId,
+        title: result.title ?? level?.title ?? result.levelId,
         stars: result.stars,
         score: result.score,
         completedAt: result.completedAt,

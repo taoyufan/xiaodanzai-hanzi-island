@@ -297,7 +297,7 @@ export class BossScene extends Phaser.Scene {
   }
 
   private finishLevel(): void {
-    const result = buildLevelResult(this.level.id, this.scoreState, this.learnedChars, true);
+    const result = buildLevelResult(this.level.id, this.scoreState, this.learnedChars, true, this.level.title);
     recordLevelCompletion(result);
     addStudySeconds((Date.now() - this.startedAt) / 1000);
     playWinSound();

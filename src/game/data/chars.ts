@@ -1,6 +1,7 @@
 import type { CharItem } from '../types';
+import { commonStandardCharsLevel1 } from './commonChars';
 
-export const charItems: CharItem[] = [
+const curatedCharItems: CharItem[] = [
   {
     id: 'zi_ren',
     char: '人',
@@ -368,6 +369,34 @@ export const charItems: CharItem[] = [
     sentence: '小鸡跟着妈妈走。',
     confusers: ['鸟', '鸭', '马'],
   },
+];
+
+const curatedChars = new Set(curatedCharItems.map((item) => item.char));
+const commonChars = Array.from(commonStandardCharsLevel1);
+
+function makeGeneratedCharItem(char: string, index: number): CharItem {
+  const confusers = [
+    commonChars[(index + 1) % commonChars.length],
+    commonChars[(index + 7) % commonChars.length],
+    commonChars[(index + 17) % commonChars.length],
+  ].filter((item) => item && item !== char);
+
+  return {
+    id: `zi_common_${char.codePointAt(0)?.toString(16) ?? index}`,
+    char,
+    pinyin: '',
+    meaning: `认识汉字“${char}”`,
+    category: index < 1200 ? 'common-basic' : index < 2400 ? 'common-advance' : 'common-expand',
+    emoji: '⭐',
+    words: [`${char}字`, `认识${char}`, `写${char}`],
+    sentence: `宝一一今天认识了“${char}”。`,
+    confusers: confusers.slice(0, 3),
+  };
+}
+
+export const charItems: CharItem[] = [
+  ...curatedCharItems,
+  ...commonChars.filter((char) => !curatedChars.has(char)).map(makeGeneratedCharItem),
 ];
 
 export const charsByChar = new Map(charItems.map((item) => [item.char, item]));

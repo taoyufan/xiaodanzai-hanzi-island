@@ -169,7 +169,44 @@ export class EggHero extends Phaser.GameObjects.Container {
         this.costumeLayer.fillCircle(58, -132, 8);
         break;
       default:
+        this.drawGenericCostume(this.costumeId);
         break;
     }
+  }
+
+  private drawGenericCostume(costumeId: string): void {
+    const color = this.colorFromId(costumeId);
+    this.costumeLayer.fillStyle(color, 1);
+    this.costumeLayer.fillRoundedRect(-58, -106, 116, 32, 16);
+    this.costumeLayer.fillCircle(0, -120, 20);
+    this.costumeLayer.fillStyle(0xffffff, 0.95);
+    this.costumeLayer.fillCircle(82, 10, 22);
+    this.costumeLayer.lineStyle(5, color, 1);
+    this.costumeLayer.strokeCircle(82, 10, 22);
+    this.costumeLayer.fillStyle(0xffd84f, 1);
+    this.costumeLayer.fillPoints(
+      [
+        new Phaser.Geom.Point(82, -4),
+        new Phaser.Geom.Point(87, 6),
+        new Phaser.Geom.Point(98, 8),
+        new Phaser.Geom.Point(90, 16),
+        new Phaser.Geom.Point(92, 28),
+        new Phaser.Geom.Point(82, 22),
+        new Phaser.Geom.Point(72, 28),
+        new Phaser.Geom.Point(74, 16),
+        new Phaser.Geom.Point(66, 8),
+        new Phaser.Geom.Point(77, 6),
+      ],
+      true,
+    );
+  }
+
+  private colorFromId(value: string): number {
+    let hash = 0;
+    for (let i = 0; i < value.length; i += 1) {
+      hash = (hash * 31 + value.charCodeAt(i)) >>> 0;
+    }
+    const palette = [0xff8ad8, 0x62d26f, 0xffd84f, 0xa7d7ff, 0x8f7cff, 0xff9dbc, 0x58d1c9, 0xffb15f];
+    return palette[hash % palette.length];
   }
 }

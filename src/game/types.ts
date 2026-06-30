@@ -1,4 +1,4 @@
-export type GameMode = 'listen_jump' | 'image_choice' | 'memory_match' | 'boss_quiz';
+export type GameMode = 'listen_jump' | 'image_choice' | 'memory_match' | 'meaning_choice' | 'word_choice' | 'boss_quiz';
 
 export type CharStatus = 'unseen' | 'learning' | 'familiar' | 'mastered' | 'weak';
 
@@ -24,6 +24,8 @@ export type LevelConfig = {
   questionCount: number;
   isBoss: boolean;
   unlockStarsRequired: number;
+  dailyDate?: string;
+  difficulty?: number;
 };
 
 export type WorldConfig = {
@@ -87,6 +89,7 @@ export type SaveData = {
 
 export type LevelRunResult = {
   levelId: string;
+  title?: string;
   score: number;
   stars: number;
   coins: number;

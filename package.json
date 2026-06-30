@@ -4,9 +4,12 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite --host 0.0.0.0",
+    "dev": "node server/dev-full.mjs",
+    "dev:web": "vite --host 0.0.0.0",
+    "api": "node --no-warnings=ExperimentalWarning server/hanzi-api.mjs",
     "build": "tsc && vite build",
-    "preview": "vite preview --host 0.0.0.0"
+    "preview": "vite preview --host 0.0.0.0",
+    "start": "node --no-warnings=ExperimentalWarning server/hanzi-api.mjs"
   },
   "dependencies": {
     "phaser": "^3.90.0"
