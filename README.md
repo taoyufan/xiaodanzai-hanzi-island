@@ -74,7 +74,7 @@ scp xiaodanzai-dist.tar.gz root@服务器IP:/tmp/
 
 ```bash
 sudo mkdir -p /data/xiaodanzai
-sudo tar -xzf /tmp/xiaodanzai-dist.tar.gz -C /data/xiaodanzai
+sudo tar -xzf xiaodanzai-dist.tar.gz -C .
 ```
 
 Nginx 配置：
