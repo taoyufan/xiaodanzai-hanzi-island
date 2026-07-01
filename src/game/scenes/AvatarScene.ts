@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { playerProfile } from '../data/player';
 import { rewards } from '../data/rewards';
 import { BigButton } from '../objects/BigButton';
+import { CostumeIcon } from '../objects/CostumeIcon';
 import { EggHero } from '../objects/EggHero';
 import { equipCostume, loadSave, unlockCostume } from '../systems/storage';
 import { playCoinSound, playCorrectSound, playWrongSound } from '../systems/sound';
@@ -78,9 +79,9 @@ export class AvatarScene extends Phaser.Scene {
 
   private drawRewardGrid(): void {
     const startX = 200;
-    const startY = 680;
+    const startY = 740;
     const gapX = 350;
-    const gapY = 210;
+    const gapY = 185;
     const start = this.page * this.pageSize;
     const pageRewards = rewards.slice(start, start + this.pageSize);
 
@@ -99,8 +100,14 @@ export class AvatarScene extends Phaser.Scene {
       bg.fillRoundedRect(-145, -84, 290, 168, 24);
       bg.lineStyle(6, equipped ? 0xffc531 : unlocked ? 0x77d67a : canBuy ? 0xffb347 : 0xa9a3b8, 1);
       bg.strokeRoundedRect(-145, -84, 290, 168, 24);
-      bg.fillStyle(reward.color, 1);
-      bg.fillCircle(-92, -24, 30);
+      const icon = this.add.container(-92, -24);
+      const iconBack = this.add.graphics();
+      iconBack.fillStyle(0xffffff, 0.88);
+      iconBack.fillRoundedRect(-42, -42, 84, 84, 18);
+      iconBack.lineStyle(4, reward.color, 0.85);
+      iconBack.strokeRoundedRect(-42, -42, 84, 84, 18);
+      const iconArt = new CostumeIcon(this, 0, 0, reward.id);
+      icon.add([iconBack, iconArt]);
       const name = this.add
         .text(-42, -44, reward.name, {
           fontFamily: 'Arial Rounded MT Bold, PingFang SC, Microsoft YaHei, sans-serif',
@@ -115,7 +122,7 @@ export class AvatarScene extends Phaser.Scene {
           color: unlocked || canBuy ? '#4d7b22' : '#8a7698',
         })
         .setOrigin(0, 0.5);
-      card.add([bg, name, status]);
+      card.add([bg, icon, name, status]);
       card.setSize(290, 168);
       card.setInteractive(new Phaser.Geom.Rectangle(-145, -84, 290, 168), Phaser.Geom.Rectangle.Contains);
       card.on('pointerup', () => this.handleRewardClick(reward.id, reward.cost, reward.name));
